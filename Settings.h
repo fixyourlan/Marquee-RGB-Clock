@@ -26,13 +26,13 @@
 #include <Max72xxPanel.h>
 #include "OpenWeatherMapClient.h"
 #include "GeoNamesClient.h"
-#include "TimeClient.h" // Using updated lib by Qrome
+#include "TimeClient.h"             // Using updated lib by Qrome
 #include "NewsApiClient.h" 
 #include "OctoPrintClient.h"
 #include "AdviceSlipClient.h"
 #include "BitcoinApiClient.h"
-#include "BME280_InsideSensor.h"  //setup Inside Temp Sensor
-#include "Round_RGB_Clock.h"      //setup RGB Ring
+#include "Round_RGB_Clock.h"        //setup RGB Ring
+#include "BME280_InsideSensor.h"    //setup Inside Temp Sensor
 //#include "max7219_Bitmaps.h"      //setup the Scrolling Display
 
 

@@ -4,11 +4,6 @@
  ***********************************************/
 
 #include "Settings.h"
-// setup rgb ring
-// moved to settings.h
-
-//  #include "Round_RGB_Clock.h"
-//  #include "max7219_Bitmaps.h"
 
 #define VERSION "1.8r"
 
@@ -165,7 +160,11 @@ void setup() {
      pixels.show();
      doRGBClock();
      pixels.show();
-     
+
+
+  //setup BME280 Sensor
+   Wire.begin(D3, D2);
+   Wire.setClock(100000);   
   
   // Initialize digital pin for LED
   pinMode(externalLight, OUTPUT);
@@ -291,6 +290,7 @@ void setup() {
     Serial.println("Web Interface is Disabled");
     scrollMessage("Web Interface is Disabled");
   }
+  checkForBME280();
    
   flashLED(1, 500);
 }
@@ -299,6 +299,11 @@ void setup() {
 // Main Looop
 //************************************************************
 void loop() {
+
+  doRGBClock();
+  pixels.show();
+
+  getInsideWeather();
  
   //Get some Weather Data to serve
   if((getMinutesFromLastRefresh() >= minutesBetweenDataRefresh) || lastEpoch == 0) {
@@ -326,10 +331,6 @@ void loop() {
     }
     matrix.fillScreen(LOW); // show black
 
-   scrollMessage("doRGBclock");   
-   doRGBClock();
-   pixels.show();
-  
     
     if (OCTOPRINT_ENABLED) {
       if (displayOn && ((printerClient.isOperational() || printerClient.isPrinting()) || printerCount == 0)) {
@@ -349,7 +350,7 @@ void loop() {
       displayRefreshCount = minutesBetweenScrolling;
       String temperature = weatherClient.getTempRounded(0);
       String description = weatherClient.getDescription(0);
-      description.toUpperCase();
+//      description.toUpperCase();
       String msg;
       msg += " ";
 
@@ -392,42 +393,46 @@ void loop() {
       }
 
       scrollMessage(msg);
+  
     }
   }
 
   String hourMinutes = timeClient.getAmPmHours() + ":" + timeClient.getMinutes();
+  String currentTemp = weatherClient.getTempRounded(0);
+  String msg = currentTemp + tempFStr;
+
   if (IS_24HOUR) {
-    hourMinutes = timeClient.getHours() + ":" + timeClient.getMinutes();
+    msg = timeClient.getHours() + ":" + timeClient.getMinutes();
   }
   if (numberOfHorizontalDisplays >= 8) {
     if (Wide_Clock_Style == "1") {
       // On Wide Display -- show the current temperature as well
-      String currentTemp = weatherClient.getTempRounded(0);
       String timeSpacer = "  ";
       if (currentTemp.length() >= 3) {
         timeSpacer = " ";
       }
-      hourMinutes += timeSpacer + currentTemp + getTempSymbol();
+      msg += hourMinutes + timeSpacer + currentTemp + getTempSymbol();
     }
     if (Wide_Clock_Style == "2") {
-      hourMinutes += ":" + timeClient.getSeconds();
+      msg += hourMinutes + ":" + timeClient.getSeconds();
       matrix.fillScreen(LOW); // show black
     }
     if (Wide_Clock_Style == "3") {
       // No change this is normal clock display
     }
   }
-  centerPrint(hourMinutes);
+  matrix.fillScreen(LOW); // show black
+  centerPrint(msg);
+
 
  
-  
   if (WEBSERVER_ENABLED) {
     server.handleClient();
   }
   if (ENABLE_OTA) {
     ArduinoOTA.handle();
   }
-}
+}  //end of main loop
 
 boolean athentication() {
   if (IS_BASIC_AUTH) {
